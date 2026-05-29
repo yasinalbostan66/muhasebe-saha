@@ -1478,8 +1478,8 @@
     }
   </style>
 
-  <!-- Tesseract.js v4 (Arka planda önceden yüklenir) -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <!-- Tesseract.js v5 (Hızlı, Arka Planda Yüklenir) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -2386,9 +2386,9 @@
 
       if (cameraStream) {
         const canvas = document.createElement('canvas');
-        let width = videoEl.videoWidth || 1280;
-        let height = videoEl.videoHeight || 720;
-        const maxDim = 1280;
+        let width = videoEl.videoWidth || 800;
+        let height = videoEl.videoHeight || 800;
+        const maxDim = 800;
         if (width > maxDim || height > maxDim) {
           if (width > height) {
             height = Math.round((height * maxDim) / width);
@@ -2429,7 +2429,7 @@
     function processAndResizeImage(base64Str, callback) {
       const img = new Image();
       img.onload = function() {
-        const maxDim = 1280;
+        const maxDim = 800;
         if (img.width > maxDim || img.height > maxDim) {
           let width = img.width;
           let height = img.height;
@@ -2674,11 +2674,8 @@
       if (_tesseractReady || _tesseractLoading || typeof Tesseract === 'undefined') return;
       _tesseractLoading = true;
       try {
-        _tesseractWorker = await Tesseract.createWorker('tur+eng', 1, {
-          workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/worker.min.js',
-          langPath: 'https://tessdata.projectnaptha.com/4.0.0',
-          corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@4/tesseract-core.wasm.js',
-          logger: () => {}
+        _tesseractWorker = await Tesseract.createWorker('tur', 1, {
+          logger: () => {} // tur yeterli, daha az RAM/CPU harcar
         });
         _tesseractReady = true;
         console.log('✓ Tesseract OCR motoru hazır');
@@ -2737,14 +2734,17 @@
             step2.querySelector('span').innerText = 'OCR motoru yükleniyor (~20 sn)...';
             await new Promise((res, rej) => {
               const timeout = setTimeout(() => rej(new Error('timeout')), 60000);
-              Tesseract.createWorker('tur+eng', 1, {
-                workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/worker.min.js',
-                langPath: 'https://tessdata.projectnaptha.com/4.0.0',
-                corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@4/tesseract-core.wasm.js',
+              Tesseract.createWorker('tur', 1, {
                 logger: m => {
                   if (m.status === 'loading tesseract core') step2.querySelector('span').innerText = 'OCR çekirdeği yükleniyor...';
-                  if (m.status === 'loading language traineddata') step2.querySelector('span').innerText = 'Türkçe dil paketi indiriliyor...';
-                  if (m.status === 'initializing tesseract') step2.querySelector('span').innerText = 'OCR motoru başlatılıyor...';
+                  if (m.status === 'loading language traineddata') step2.querySelector('span').innerText = 'Türkçe modeli indiriliyor...';
+                  if (m.status === 'initializing tesseract') step2.querySelector('span').innerText = 'OCR başlatılıyor...';
+                  if (m.status === 'recognizing text') {
+                    step2.classList.remove('active');
+                    step2.classList.add('done');
+                    step3.classList.add('active');
+                    step3.querySelector('span').innerText = `Metin okunuyor (%${Math.round(m.progress * 100)})`;
+                  }
                 }
               }).then(w => { _tesseractWorker = w; _tesseractReady = true; clearTimeout(timeout); res(); })
                 .catch(e => { clearTimeout(timeout); rej(e); });
