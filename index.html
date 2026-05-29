@@ -1477,43 +1477,12 @@
       }
     }
   </style>
-  <!-- Tesseract.js (İstemci tabanlı gerçek zamanlı OCR motoru) -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  
-  <!-- CDN Yedekli Yükleyici (Telefonlarda Tesseract'ın yüklenmesini garanti altına alır) -->
-  <script>
-    function loadScript(primaryUrl, fallbackUrl) {
-      return new Promise((resolve) => {
-        const script = document.createElement('script');
-        script.src = primaryUrl;
-        script.onload = () => resolve(true);
-        script.onerror = () => {
-          console.warn("Birincil CDN başarısız, yedek CDN deneniyor:", fallbackUrl);
-          const fallbackScript = document.createElement('script');
-          fallbackScript.src = fallbackUrl;
-          fallbackScript.onload = () => resolve(true);
-          fallbackScript.onerror = () => {
-            console.error("Yedek CDN de başarısız oldu!");
-            resolve(false);
-          };
-          document.head.appendChild(fallbackScript);
-        };
-        document.head.appendChild(script);
-      });
-    }
 
-    // Tesseract kütüphanesini yedekli yükle
-    window.addEventListener('DOMContentLoaded', async () => {
-      if (typeof Tesseract === 'undefined') {
-        await loadScript(
-          "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",
-          "https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.0/tesseract.min.js"
-        );
-      }
-    });
-  </script>
+  <!-- Tesseract.js (İstemci tabanlı gerçek zamanlı OCR motoru - HTTP üzerinde çalışır) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
+
 
   <!-- RESPONSIVE HYBRID KAPSAYICI -->
   <div class="app-container">
@@ -2709,15 +2678,12 @@
       processingCard.style.display = 'flex';
       formCard.style.display = 'none';
 
-      // Adımları temizle
       for (let i = 1; i <= 4; i++) {
-        const stepEl = document.getElementById(`step-${i}`);
-        stepEl.className = 'process-step';
+        document.getElementById(`step-${i}`).className = 'process-step';
       }
 
       visorContainer.classList.add('scanning');
 
-      // Tesseract Yükleme ve Analiz Akışı
       const step1 = document.getElementById('step-1');
       const step2 = document.getElementById('step-2');
       const step3 = document.getElementById('step-3');
@@ -2725,52 +2691,40 @@
 
       step1.classList.add('active');
 
-      // Adım 1: Vizör görüntü iyileştirme efekti (500ms)
       setTimeout(() => {
         step1.classList.remove('active');
         step1.classList.add('done');
         step2.classList.add('active');
 
-
-        // Tesseract yüklü mü kontrol et (Yüklü değilse veya internet yoksa fallback çalıştır)
         if (typeof Tesseract === 'undefined') {
-          console.warn("Tesseract CDN yüklenemedi. Simülasyon moduna geçiliyor...");
+          console.warn('Tesseract yüklenemedi, simülatör başlatılıyor...');
           runSimulatedOcr(step2, step3, step4, processingCard, formCard);
           return;
         }
 
         let hasFinished = false;
 
-        // Ağ ve çözümleme yavaşlığı durumunda fail-safe zaman aşımı (15 saniye - mobil bağlantılar için)
+        // Mobil için yeterli süre (30 saniye)
         const ocrTimeout = setTimeout(() => {
           if (!hasFinished) {
             hasFinished = true;
-            console.warn("OCR Süresi aşıldı (15 saniye). Simülasyon moduna geçiliyor...");
-            showToast("Bağlantı yavaş, akıllı simülasyon başlatılıyor...");
-            
-            // Clean up UI classes so they are shown correctly in simulator
-            step2.className = 'process-step done';
-            step3.className = 'process-step done';
-            step4.className = 'process-step active';
-            
             runSimulatedOcr(step2, step3, step4, processingCard, formCard);
           }
-        }, 15000);
+        }, 30000);
 
         try {
-          // Adım 2 ve 3: Tesseract ile Gerçek Zamanlı OCR
           Tesseract.recognize(
             imageSrc,
-            'tur+eng', // Türkçe ve İngilizce desteği
+            'tur+eng',
             {
               logger: m => {
                 if (hasFinished) return;
                 if (m.status === 'recognizing text') {
-                  const progressPercent = Math.round(m.progress * 100);
+                  const pct = Math.round(m.progress * 100);
                   step3.classList.add('active');
                   step2.classList.remove('active');
                   step2.classList.add('done');
-                  step3.querySelector('span').innerText = `Yapay zeka karakterleri çözümlüyor (%${progressPercent})...`;
+                  step3.querySelector('span').innerText = `Yapay zeka karakterleri çözümlüyor (%${pct})...`;
                 }
               }
             }
@@ -2779,51 +2733,43 @@
             hasFinished = true;
             clearTimeout(ocrTimeout);
 
-            step3.querySelector('span').innerText = 'Yapay zeka ile metin analizi tamamlandı.';
+            step3.querySelector('span').innerText = 'Metin analizi tamamlandı.';
             step3.classList.remove('active');
             step3.classList.add('done');
             step4.classList.add('active');
 
-            console.log("=== Taranan Fiş Metni ===");
-            console.log(text);
-
-            // Adım 4: Verileri Çözümle
             setTimeout(() => {
               const parsed = parseReceiptText(text);
 
-              // Formu doldur
               document.getElementById('input-company').value = parsed.company;
               document.getElementById('input-date').value = parsed.date;
               document.getElementById('input-receipt-no').value = parsed.receiptNo;
               document.getElementById('input-category').value = parsed.category;
               document.getElementById('input-kdv').value = parsed.kdv;
-              document.getElementById('input-total').value = parsed.total.replace ? parsed.total : parsed.total.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' TL';
+              document.getElementById('input-total').value = parsed.total.replace
+                ? parsed.total
+                : parsed.total.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' TL';
 
               step4.classList.remove('active');
               step4.classList.add('done');
-
-              // Ekranı Değiştir
               visorContainer.classList.remove('scanning');
               processingCard.style.display = 'none';
               formCard.style.display = 'flex';
               formCard.classList.add('shake-animation');
               setTimeout(() => formCard.classList.remove('shake-animation'), 600);
-              
-              showToast("Fiş başarıyla analiz edildi!");
+              showToast('Fiş başarıyla analiz edildi!');
             }, 100);
           }).catch(err => {
             if (hasFinished) return;
             hasFinished = true;
             clearTimeout(ocrTimeout);
-
-            console.error("OCR Hatalı, simüle veriye geçiliyor:", err);
+            console.error('OCR hata:', err);
             runSimulatedOcr(step2, step3, step4, processingCard, formCard);
           });
         } catch (syncErr) {
           if (!hasFinished) {
             hasFinished = true;
             clearTimeout(ocrTimeout);
-            console.error("OCR Senkron Hata, simüle veriye geçiliyor:", syncErr);
             runSimulatedOcr(step2, step3, step4, processingCard, formCard);
           }
         }
@@ -2831,30 +2777,22 @@
       }, 100);
     }
 
-    // Fail-safe Hızlı OCR Simülatör Fallback
     function runSimulatedOcr(step2, step3, step4, processingCard, formCard) {
       setTimeout(() => {
-        step2.classList.remove('active');
-        step2.classList.add('done');
+        step2.classList.remove('active'); step2.classList.add('done');
         step3.classList.add('active');
-        
         setTimeout(() => {
-          step3.classList.remove('active');
-          step3.classList.add('done');
+          step3.classList.remove('active'); step3.classList.add('done');
           step4.classList.add('active');
-          
           setTimeout(() => {
-            step4.classList.remove('active');
-            step4.classList.add('done');
-            
-            // Fiş simüle değerlerini ata
+            step4.classList.remove('active'); step4.classList.add('done');
             generateOcrFormValues();
-            
             visorContainer.classList.remove('scanning');
             processingCard.style.display = 'none';
             formCard.style.display = 'flex';
             formCard.classList.add('shake-animation');
             setTimeout(() => formCard.classList.remove('shake-animation'), 600);
+            showToast('Simülasyon modu: Fiş verileri dolduruldu.');
           }, 200);
         }, 250);
       }, 200);
@@ -2862,24 +2800,21 @@
 
     const mockCompanies = ['OPET AKARYAKIT A.Ş.', 'MİGROS SÜPERMARKET', 'CARREFOURSA', 'STARBUCKS COFFEE', 'TEKNOSA MAĞAZACILIK', 'BİM BİRLEŞİK MAĞAZALAR'];
     const mockKdv = ['%20', '%10', '%20', '%10', '%20', '%1'];
-    const mockCats = ['Akaryakıt', 'Gıda', 'Gıda', 'Kafe', 'Diğer', 'Gıda'];
+    const mockCats = ['Akaryakıt/Ulaşım', 'Gıda', 'Gıda', 'Dışarıda yeme-içme', 'Teknoloji', 'Gıda'];
 
     function generateOcrFormValues() {
-      const randomIndex = Math.floor(Math.random() * mockCompanies.length);
+      const idx = Math.floor(Math.random() * mockCompanies.length);
       const today = new Date();
-      const formattedDate = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
-      const randomTotal = (Math.random() * 1450 + 50).toFixed(2);
-      const randomReceiptNo = String(Math.floor(Math.random() * 9000) + 1000);
-
-      document.getElementById('input-company').value = mockCompanies[randomIndex];
-      document.getElementById('input-date').value = formattedDate;
-      document.getElementById('input-receipt-no').value = randomReceiptNo;
-      document.getElementById('input-category').value = mockCats[randomIndex];
-      document.getElementById('input-kdv').value = mockKdv[randomIndex];
-      document.getElementById('input-total').value = randomTotal.replace('.', ',') + ' TL';
+      const d = `${String(today.getDate()).padStart(2,'0')}.${String(today.getMonth()+1).padStart(2,'0')}.${today.getFullYear()}`;
+      document.getElementById('input-company').value = mockCompanies[idx];
+      document.getElementById('input-date').value = d;
+      document.getElementById('input-receipt-no').value = String(Math.floor(Math.random()*9000)+1000);
+      document.getElementById('input-category').value = mockCats[idx];
+      document.getElementById('input-kdv').value = mockKdv[idx];
+      document.getElementById('input-total').value = (Math.random()*1450+50).toFixed(2).replace('.', ',') + ' TL';
     }
 
-    // OCR Form Kaydetme
+        // OCR Form Kaydetme
     document.getElementById('btn-ocr-save').addEventListener('click', () => {
       const companyVal = document.getElementById('input-company').value.trim();
       const dateVal = document.getElementById('input-date').value.trim();
@@ -3122,7 +3057,6 @@
       updateDashboardStats();
       renderReceiptsList();
       renderCategoryChart();
-
       // Kategori Sekmelerinin Bağlanması
       const tabButtons = document.querySelectorAll('.category-tabs .tab-btn');
       tabButtons.forEach(btn => {
