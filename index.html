@@ -2401,15 +2401,19 @@
         company = 'BİLİNMEYEN FİRMA A.Ş.';
       }
 
-      // Firma Adı veya İçeriğe Göre Akıllı Kategori Tespiti
+      // Firma Adı veya İçeriğe Göre Akıllı Kategori Tespiti (Öncelikli Eşleşme)
       const lowerCompany = company.toLowerCase() + ' ' + text.toLowerCase();
-      if (lowerCompany.includes('petrol') || lowerCompany.includes('opet') || lowerCompany.includes('shell') || lowerCompany.includes('bp') || lowerCompany.includes('aygaz') || lowerCompany.includes('lukoil') || lowerCompany.includes('akaryakit') || lowerCompany.includes('yakit') || lowerCompany.includes('istasyon')) {
+      
+      if (lowerCompany.includes('eczane') || lowerCompany.includes('ilac') || lowerCompany.includes('ilaç') || lowerCompany.includes('saglik') || lowerCompany.includes('sağlık') || lowerCompany.includes('optik') || lowerCompany.includes('medikal') || lowerCompany.includes('hastane') || lowerCompany.includes('klinik') || lowerCompany.includes('doktor') || lowerCompany.includes('pharmacy') || lowerCompany.includes('medicine')) {
+        category = 'Diğer';
+        kdv = '%10'; // İlaç ve sağlık hizmetlerinde genellikle KDV %10'dur
+      } else if (lowerCompany.includes('petrol') || lowerCompany.includes('opet') || lowerCompany.includes('shell') || lowerCompany.includes('bp') || lowerCompany.includes('aygaz') || lowerCompany.includes('lukoil') || lowerCompany.includes('akaryakit') || lowerCompany.includes('yakit') || lowerCompany.includes('istasyon') || lowerCompany.includes('otogaz') || lowerCompany.includes('yakıt') || lowerCompany.includes('akaryakıt')) {
         category = 'Akaryakıt';
         kdv = '%20';
-      } else if (lowerCompany.includes('cafe') || lowerCompany.includes('kahve') || lowerCompany.includes('starbucks') || lowerCompany.includes('restaurant') || lowerCompany.includes('restoran') || lowerCompany.includes('yemek') || lowerCompany.includes('döner') || lowerCompany.includes('doner') || lowerCompany.includes('pizz')) {
+      } else if (lowerCompany.includes('cafe') || lowerCompany.includes('kahve') || lowerCompany.includes('starbucks') || lowerCompany.includes('restaurant') || lowerCompany.includes('restoran') || lowerCompany.includes('yemek') || lowerCompany.includes('döner') || lowerCompany.includes('doner') || lowerCompany.includes('pizz') || lowerCompany.includes('burger') || lowerCompany.includes('kfc') || lowerCompany.includes('mcdonald') || lowerCompany.includes('pastane') || lowerCompany.includes('börek') || lowerCompany.includes('borek')) {
         category = 'Kafe';
         kdv = '%10';
-      } else if (lowerCompany.includes('migros') || lowerCompany.includes('bim') || lowerCompany.includes('sok') || lowerCompany.includes('a101') || lowerCompany.includes('carrefour') || lowerCompany.includes('market') || lowerCompany.includes('hipermarket') || lowerCompany.includes('gida') || lowerCompany.includes('magaza')) {
+      } else if (lowerCompany.includes('migros') || lowerCompany.includes('bim') || lowerCompany.includes('sok') || lowerCompany.includes('şok') || lowerCompany.includes('a101') || lowerCompany.includes('carrefour') || lowerCompany.includes('market') || lowerCompany.includes('hipermarket') || lowerCompany.includes('gida') || lowerCompany.includes('gıda') || lowerCompany.includes('magaza') || lowerCompany.includes('mağaza') || lowerCompany.includes('manav') || lowerCompany.includes('kasap') || lowerCompany.includes('şarküteri') || lowerCompany.includes('sarkuteri') || lowerCompany.includes('tekel')) {
         category = 'Gıda';
         kdv = '%10';
       }
