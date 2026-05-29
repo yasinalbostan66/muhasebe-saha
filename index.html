@@ -173,13 +173,15 @@
 
     /* --- UYGULAMA ÇUBUĞU (APP BAR) --- */
     .app-bar {
-      height: 65px;
+      height: calc(65px + env(safe-area-inset-top));
+      padding-top: env(safe-area-inset-top);
       background: var(--bg-dark);
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 20px;
+      padding-left: 20px;
+      padding-right: 20px;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -274,7 +276,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      padding-bottom: 90px; /* FAB için pay */
+      padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* FAB payı ve safe area */
       width: 100%;
     }
 
@@ -288,7 +290,25 @@
     }
 
     .screen-content::-webkit-scrollbar {
-      display: none;
+      width: 6px;
+      height: 6px;
+    }
+    .screen-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .screen-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+    }
+    .screen-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    body.light-theme .screen-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+    }
+    body.light-theme .screen-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.3);
     }
 
     /* RESPONSIVE GRID DÜZENLERİ (MOBİL VE WEB UYUMLULUĞU) */
@@ -527,7 +547,7 @@
     /* --- FLOATING ACTION BUTTON (FAB) --- */
     .fab-container {
       position: absolute;
-      bottom: 25px;
+      bottom: calc(25px + env(safe-area-inset-bottom));
       left: 0;
       width: 100%;
       display: flex;
@@ -774,6 +794,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      min-width: 0; /* İçerik taşmasını önler ve büzülmeye izin verir */
     }
 
     .receipt-icon {
@@ -805,12 +826,15 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      min-width: 0; /* İçeriğin düzgünce wrap olmasını sağlar */
     }
 
     .receipt-title {
       font-size: 14px;
       font-weight: 600;
       color: var(--text-main);
+      white-space: normal; /* Uzun isimlerin alt satıra geçmesini sağlar */
+      word-break: break-word; /* Kelimeleri düzgün böler */
     }
 
     .receipt-meta {
@@ -954,6 +978,8 @@
       letter-spacing: 0.5px;
       margin-bottom: 4px;
       font-family: 'Courier New', Courier, monospace;
+      white-space: normal;
+      word-break: break-word;
     }
 
     .bill-sub {
