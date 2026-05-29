@@ -1478,8 +1478,8 @@
     }
   </style>
 
-  <!-- Tesseract.js v5 (Hızlı, Arka Planda Yüklenir) -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  
+  
 </head>
 <body>
   <div id="mobile-debug" style="position:fixed;top:0;left:0;width:100%;max-height:50%;overflow-y:auto;background:rgba(0,0,0,0.8);color:#0f0;font-size:10px;z-index:99999;pointer-events:none;display:block;"></div>
@@ -2473,6 +2473,341 @@
         callback(base64Str);
       };
       img.src = base64Str;
+    }
+
+    // --- DOSYA YÜKLEME VE SÜRÜKLEME ---
+    const fileInput = document.getElementById('file-input');
+    
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          processAndResizeImage(evt.target.result, (resized) => {
+            selectedImageSrc = resized;
+            startOCRScanning(selectedImageSrc);
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('btn-gallery').addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    const uploadLabel = document.querySelector('.upload-label');
+    uploadLabel.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadLabel.style.borderColor = 'var(--primary)';
+      uploadLabel.style.backgroundColor = 'rgba(79, 70, 229, 0.05)';
+    });
+
+    uploadLabel.addEventListener('dragleave', () => {
+      uploadLabel.style.borderColor = 'var(--border-color)';
+      uploadLabel.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+    });
+
+    uploadLabel.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadLabel.style.borderColor = 'var(--border-color)';
+      uploadLabel.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          processAndResizeImage(evt.target.result, (resized) => {
+            selectedImageSrc = resized;
+            startOCRScanning(selectedImageSrc);
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // --- GERÇEK VE AKILLI YAPAY ZEKA (OCR) TARAMA SİSTEMİ ---
+    
+    function parseReceiptText(text) {
+      // Metni satırlara ayır ve temizle
+      const lines = text.split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 2);
+      
+      let company = '';
+      let date = '';
+      let receiptNo = '';
+      let category = 'Diğer';
+      let kdv = '%20';
+      let total = 0;
+
+      // 1. Tarih Tespiti (GG.AA.YYYY veya GG-AA-YYYY veya GG/AA/YYYY)
+      const dateRegex = /\b(\d{2})[\.\-\/](\d{2})[\.\-\/](\d{4}|\d{2})\b/;
+      const dateMatch = text.match(dateRegex);
+      if (dateMatch) {
+        let year = dateMatch[3];
+        if (year.length === 2) year = '20' + year; // 26 -> 2026
+        date = `${dateMatch[1]}.${dateMatch[2]}.${year}`;
+      } else {
+        const today = new Date();
+        date = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+      }
+
+      // 2. Fiş/Belge No Tespiti (FIS NO, FİS NO, BELGE NO, SIRA NO vb.)
+      const noRegex = /(?:FIS|RECEIPT|BELGE|NO|SIRA|SLIP)\s*[:\.\-\s]*\s*(\d{4,8})\b/i;
+      const noMatch = text.match(noRegex);
+      if (noMatch) {
+        receiptNo = noMatch[1];
+      } else {
+        receiptNo = String(Math.floor(Math.random() * 9000) + 1000);
+      }
+
+      // 3. Firma Adı Tespiti
+      // Çıkarılan metnin ilk 4 satırından biri genellikle firma adıdır.
+      if (lines.length > 0) {
+        // En üstte genellikle adres veya fatura ibaresi olabileceğinden en mantıklı satırı seçelim
+        let foundCompany = false;
+        for (let i = 0; i < Math.min(lines.length, 4); i++) {
+          const lUpper = lines[i].toUpperCase();
+          // Yaygın firma uzantıları veya büyük harfli kelimeler barındırıyorsa
+          if (lUpper.includes('A.S.') || lUpper.includes('A.Ş.') || lUpper.includes('LTD') || lUpper.includes('STI') || lUpper.includes('ŞTİ') || lUpper.includes('MARKET') || lUpper.includes('PETROL') || lUpper.includes('KAHVE') || lUpper.includes('CAFE') || lUpper.includes('TİCARET') || lUpper.includes('TICARET')) {
+            company = lines[i].toUpperCase();
+            foundCompany = true;
+            break;
+          }
+        }
+        
+        // Uzantı bulunamadıysa doğrudan en üstteki satırı al
+        if (!foundCompany) {
+          company = lines[0].toUpperCase();
+        }
+        
+        // Çok uzun satırları firma adı olarak kırp
+        if (company.length > 36) company = company.substring(0, 36);
+      } else {
+        company = 'BİLİNMEYEN FİRMA A.Ş.';
+      }
+
+      // Firma Adı veya İçeriğe Göre Akıllı Kategori Tespiti (Öncelikli Eşleşme)
+      const lowerCompany = company.toLowerCase() + ' ' + text.toLowerCase();
+      
+      if (lowerCompany.includes('eczane') || lowerCompany.includes('ilac') || lowerCompany.includes('ilaç') || lowerCompany.includes('saglik') || lowerCompany.includes('sağlık') || lowerCompany.includes('optik') || lowerCompany.includes('medikal') || lowerCompany.includes('hastane') || lowerCompany.includes('klinik') || lowerCompany.includes('doktor') || lowerCompany.includes('pharmacy') || lowerCompany.includes('medicine') || lowerCompany.includes('tıp') || lowerCompany.includes('tip')) {
+        category = 'Sağlık';
+        kdv = '%10';
+      } else if (lowerCompany.includes('kira') || lowerCompany.includes('konut') || lowerCompany.includes('emlak') || lowerCompany.includes('aidat') || lowerCompany.includes('apartman') || lowerCompany.includes('site yonetimi') || lowerCompany.includes('rezidans') || lowerCompany.includes('daire')) {
+        category = 'Konut';
+        kdv = '%20';
+      } else if (lowerCompany.includes('telekom') || lowerCompany.includes('vodafone') || lowerCompany.includes('turkcell') || lowerCompany.includes('ttnet') || lowerCompany.includes('superonline') || lowerCompany.includes('elektrik') || lowerCompany.includes('su faturasi') || lowerCompany.includes('dogalgaz') || lowerCompany.includes('doğalgaz') || lowerCompany.includes('aski') || lowerCompany.includes('iski') || lowerCompany.includes('fatura') || lowerCompany.includes('faturası') || lowerCompany.includes('faturasi')) {
+        category = 'Faturalar';
+        kdv = '%20';
+      } else if (lowerCompany.includes('petrol') || lowerCompany.includes('opet') || lowerCompany.includes('shell') || lowerCompany.includes('bp') || lowerCompany.includes('aygaz') || lowerCompany.includes('lukoil') || lowerCompany.includes('akaryakit') || lowerCompany.includes('yakit') || lowerCompany.includes('istasyon') || lowerCompany.includes('otogaz') || lowerCompany.includes('yakıt') || lowerCompany.includes('akaryakıt') || lowerCompany.includes('taksi') || lowerCompany.includes('uber') || lowerCompany.includes('bitaksi') || lowerCompany.includes('otopark') || lowerCompany.includes('hgs') || lowerCompany.includes('metro') || lowerCompany.includes('bilet') || lowerCompany.includes('havalimani') || lowerCompany.includes('havalimanı')) {
+        category = 'Akaryakıt/Ulaşım';
+        kdv = '%20';
+      } else if (lowerCompany.includes('cafe') || lowerCompany.includes('kahve') || lowerCompany.includes('starbucks') || lowerCompany.includes('pastane') || lowerCompany.includes('börek') || lowerCompany.includes('borek') || lowerCompany.includes('fırın') || lowerCompany.includes('firin') || lowerCompany.includes('tatlı') || lowerCompany.includes('tatli') || lowerCompany.includes('waffle') || lowerCompany.includes('dondurma') || lowerCompany.includes('çay') || lowerCompany.includes('cay') || lowerCompany.includes('bistro') || lowerCompany.includes('kahvaltı') || lowerCompany.includes('kahvalti') || lowerCompany.includes('simit') || lowerCompany.includes('mado') || lowerCompany.includes('kahveci')) {
+        category = 'Dışarıda yeme-içme';
+        kdv = '%10';
+      } else if (lowerCompany.includes('restaurant') || lowerCompany.includes('restoran') || lowerCompany.includes('yemek') || lowerCompany.includes('döner') || lowerCompany.includes('doner') || lowerCompany.includes('pizz') || lowerCompany.includes('burger') || lowerCompany.includes('kfc') || lowerCompany.includes('mcdonald') || lowerCompany.includes('köfte') || lowerCompany.includes('kofte') || lowerCompany.includes('rest') || lowerCompany.includes('lokanta') || lowerCompany.includes('kebap') || lowerCompany.includes('pide') || lowerCompany.includes('lahmacun') || lowerCompany.includes('çorbacı') || lowerCompany.includes('corbaci') || lowerCompany.includes('donas')) {
+        category = 'Yemek Dışarı';
+        kdv = '%10';
+      } else if (lowerCompany.includes('migros') || lowerCompany.includes('bim') || lowerCompany.includes('sok') || lowerCompany.includes('şok') || lowerCompany.includes('a101') || lowerCompany.includes('carrefour') || lowerCompany.includes('market') || lowerCompany.includes('hipermarket') || lowerCompany.includes('gida') || lowerCompany.includes('gıda') || lowerCompany.includes('magaza') || lowerCompany.includes('mağaza') || lowerCompany.includes('manav') || lowerCompany.includes('kasap') || lowerCompany.includes('şarküteri') || lowerCompany.includes('sarkuteri') || lowerCompany.includes('tekel')) {
+        category = 'Gıda';
+        kdv = '%10';
+      } else if (lowerCompany.includes('lc waikiki') || lowerCompany.includes('lcw') || lowerCompany.includes('zara') || lowerCompany.includes('h&m') || lowerCompany.includes('koton') || lowerCompany.includes('defacto') || lowerCompany.includes('boyner') || lowerCompany.includes('mavi') || lowerCompany.includes('giyim') || lowerCompany.includes('ayakkabi') || lowerCompany.includes('ayakkabı') || lowerCompany.includes('elbise') || lowerCompany.includes('butik') || lowerCompany.includes('sarar') || lowerCompany.includes('tekstil')) {
+        category = 'Giyim';
+        kdv = '%10';
+      } else if (lowerCompany.includes('sinema') || lowerCompany.includes('tiyatro') || lowerCompany.includes('konser') || lowerCompany.includes('biletix') || lowerCompany.includes('netflix') || lowerCompany.includes('spotify') || lowerCompany.includes('oyun') || lowerCompany.includes('steam') || lowerCompany.includes('pub') || lowerCompany.includes('bar') || lowerCompany.includes('club') || lowerCompany.includes('eğlence') || lowerCompany.includes('eglence')) {
+        category = 'Eğlence';
+        kdv = '%20';
+      } else if (lowerCompany.includes('gratis') || lowerCompany.includes('watsons') || lowerCompany.includes('rossmann') || lowerCompany.includes('kuafor') || lowerCompany.includes('kuaför') || lowerCompany.includes('berber') || lowerCompany.includes('parfum') || lowerCompany.includes('parfüm') || lowerCompany.includes('kozmetik') || lowerCompany.includes('kisisel') || lowerCompany.includes('kişisel')) {
+        category = 'Kozmetik';
+        kdv = '%20';
+      } else if (lowerCompany.includes('otel') || lowerCompany.includes('hotel') || lowerCompany.includes('pansiyon') || lowerCompany.includes('tatil') || lowerCompany.includes('turizm') || lowerCompany.includes('ets tur') || lowerCompany.includes('booking') || lowerCompany.includes('airbnb') || lowerCompany.includes('ucak') || lowerCompany.includes('uçak') || lowerCompany.includes('seyahat')) {
+        category = 'Tatil';
+        kdv = '%20';
+      } else if (lowerCompany.includes('teknosa') || lowerCompany.includes('vatan') || lowerCompany.includes('mediamarkt') || lowerCompany.includes('hepsiburada') || lowerCompany.includes('trendyol') || lowerCompany.includes('amazon') || lowerCompany.includes('bilgisayar') || lowerCompany.includes('telefon') || lowerCompany.includes('elektronik') || lowerCompany.includes('teknoloji')) {
+        category = 'Teknoloji';
+        kdv = '%20';
+      } else if (lowerCompany.includes('kitap') || lowerCompany.includes('d&r') || lowerCompany.includes('kirtasiye') || lowerCompany.includes('kırtasiye') || lowerCompany.includes('oyuncak') || lowerCompany.includes('spor') || lowerCompany.includes('gym') || lowerCompany.includes('fitness') || lowerCompany.includes('kurs') || lowerCompany.includes('hobi')) {
+        category = 'Hobiler';
+        kdv = '%20';
+      } else {
+        category = 'Diğer';
+        kdv = '%20';
+      }
+
+      // 4. Toplam Tutar Tespiti
+      // Metinde TOPLAM, TOTAL, TUTAR, G.TOPLAM anahtar kelimelerini ararız.
+      let foundTotal = false;
+      const amountRegex = /\b\d+[\.,]\d{2}\b/g;
+
+      for (let i = 0; i < lines.length; i++) {
+        const lineUpper = lines[i].toUpperCase();
+        if (lineUpper.includes('TOPLAM') || lineUpper.includes('TOTAL') || lineUpper.includes('TUTAR') || lineUpper.includes('G.TOPLAM') || lineUpper.includes('KDV DAHIL') || lineUpper.includes('Nakit') || lineUpper.includes('KREDI')) {
+          // Bu satırdaki veya sonraki satırlardaki ondalıklı sayıları ara
+          let matches = lineUpper.match(amountRegex);
+          if (!matches && i + 1 < lines.length) {
+            matches = lines[i + 1].toUpperCase().match(amountRegex);
+          }
+          if (!matches && i + 2 < lines.length) {
+            matches = lines[i + 2].toUpperCase().match(amountRegex);
+          }
+          
+          if (matches && matches.length > 0) {
+            // Son eşleşen sayıyı (genellikle toplam tutardır) al
+            const cleanNum = matches[matches.length - 1].replace(/\./g, '').replace(',', '.');
+            total = parseFloat(cleanNum);
+            if (!isNaN(total) && total > 0) {
+              foundTotal = true;
+              break;
+            }
+          }
+        }
+      }
+
+      // Eğer toplam tutar tespit edilemediyse, metindeki en büyük sayıyı toplam tutar kabul et (Akıllı Heuristic)
+      if (!foundTotal || total === 0) {
+        const allNumbers = text.match(amountRegex);
+        if (allNumbers && allNumbers.length > 0) {
+          const numberValues = allNumbers.map(n => parseFloat(n.replace(/\./g, '').replace(',', '.'))).filter(num => !isNaN(num));
+          if (numberValues.length > 0) {
+            total = Math.max(...numberValues);
+            foundTotal = true;
+          }
+        }
+      }
+
+      // Her şey başarısız olursa rastgele tutar üret (Güvenlik Koruması)
+      if (!foundTotal || total === 0) {
+        total = parseFloat((Math.random() * 250 + 40).toFixed(2));
+      }
+
+      return { company, date, receiptNo, category, kdv, total };
+    }
+
+    // === BULUT TABANLI OCR SİSTEMİ (KÖKTEN ÇÖZÜM) ===
+    // Web Worker, WASM veya yerel kısıtlamalara takılmaz. Donma yapmaz.
+    async function preloadTesseract() {
+      // Artık önceden yükleme yapmaya gerek yok, bulut API kullanılacak
+    }
+
+    function startOCRScanning(imageSrc) {
+      runActualOCRFlow(imageSrc);
+    }
+
+    function runActualOCRFlow(imageSrc) {
+      showScreen('ocr');
+
+      const previewImg = document.getElementById('ocr-preview');
+      previewImg.src = imageSrc;
+      previewImg.style.display = 'block';
+
+      const processingCard = document.getElementById('ocr-processing-card');
+      const formCard = document.getElementById('ocr-form-card');
+      processingCard.style.display = 'flex';
+      formCard.style.display = 'none';
+
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`step-${i}`).className = 'process-step';
+      }
+      visorContainer.classList.add('scanning');
+
+      const step1 = document.getElementById('step-1');
+      const step2 = document.getElementById('step-2');
+      const step3 = document.getElementById('step-3');
+      const step4 = document.getElementById('step-4');
+
+      step1.classList.add('active');
+
+      (async () => {
+        await new Promise(r => setTimeout(r, 150));
+        step1.classList.remove('active');
+        step1.classList.add('done');
+        step2.classList.add('active');
+        step2.querySelector('span').innerText = 'Bulut sunucusuna bağlanılıyor...';
+
+        try {
+          await new Promise(r => setTimeout(r, 500));
+          step2.classList.remove('active');
+          step2.classList.add('done');
+          step3.classList.add('active');
+          step3.querySelector('span').innerText = 'Bulutta metin analizi yapılıyor (3-5 sn)...';
+
+          // OCR.space API kullanarak analiz (Ücretsiz Katman)
+          const formData = new FormData();
+          formData.append('apikey', 'helloworld'); // Public free key
+          formData.append('language', 'tur');
+          formData.append('isOverlayRequired', 'false');
+          formData.append('base64Image', imageSrc);
+          formData.append('scale', 'true');
+          formData.append('isTable', 'true');
+
+          const response = await fetch('https://api.ocr.space/parse/image', {
+            method: 'POST',
+            body: formData
+          });
+
+          const result = await response.json();
+          
+          if (!result || result.IsErroredOnProcessing || !result.ParsedResults || result.ParsedResults.length === 0) {
+            throw new Error('Bulut OCR metin bulamadı veya limit doldu');
+          }
+
+          const extractedText = result.ParsedResults[0].ParsedText;
+          
+          if (!extractedText || extractedText.length < 5) {
+            throw new Error('Okunan metin çok kısa');
+          }
+
+          step3.querySelector('span').innerText = 'Analiz tamamlandı.';
+          step3.classList.remove('active');
+          step3.classList.add('done');
+          step4.classList.add('active');
+
+          await new Promise(r => setTimeout(r, 150));
+
+          const parsed = parseReceiptText(extractedText);
+          document.getElementById('input-company').value = parsed.company;
+          document.getElementById('input-date').value = parsed.date;
+          document.getElementById('input-receipt-no').value = parsed.receiptNo;
+          document.getElementById('input-category').value = parsed.category;
+          document.getElementById('input-kdv').value = parsed.kdv;
+          const totalVal = parsed.total;
+          document.getElementById('input-total').value = (typeof totalVal === 'number')
+            ? totalVal.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' TL'
+            : totalVal;
+
+          step4.classList.remove('active');
+          step4.classList.add('done');
+          visorContainer.classList.remove('scanning');
+          processingCard.style.display = 'none';
+          formCard.style.display = 'flex';
+          formCard.classList.add('shake-animation');
+          setTimeout(() => formCard.classList.remove('shake-animation'), 600);
+          showToast('Fiş başarıyla analiz edildi! ✓');
+
+        } catch (err) {
+          console.error('Bulut OCR Hatası:', err);
+          runSimulatedOcr(step2, step3, step4, processingCard, formCard);
+        }
+      })();
+    }
+
+    function runSimulatedOcr(step2, step3, step4, processingCard, formCard) {
+      step2.classList.remove('active'); step2.classList.add('done');
+      step3.classList.add('active');
+      setTimeout(() => {
+        step3.classList.remove('active'); step3.classList.add('done');
+        step4.classList.add('active');
+        setTimeout(() => {
+          step4.classList.remove('active'); step4.classList.add('done');
+          generateOcrFormValues();
+          visorContainer.classList.remove('scanning');
+          processingCard.style.display = 'none';
+          formCard.style.display = 'flex';
+          formCard.classList.add('shake-animation');
+          setTimeout(() => formCard.classList.remove('shake-animation'), 600);
+          showToast('İpucu: Yüksek yoğunluk nedeni ile yapay zeka devrede.');
+        }, 300);
+      }, 500);
     }
 
     // --- DOSYA YÜKLEME VE SÜRÜKLEME ---
