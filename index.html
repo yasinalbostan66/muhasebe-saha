@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
   <!-- Web App / PWA Meta Etiketleri (Telefonda Tam Ekran Mobil Uygulama Deneyimi İçin) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -75,6 +75,16 @@
       --panel-shadow: rgba(15, 23, 42, 0.15);
     }
 
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden; /* Tarayıcı pencere kaydırmasını kapat */
+      background-color: var(--bg-body);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -85,13 +95,10 @@
     }
 
     body {
-      background-color: var(--bg-body);
       color: var(--text-main);
-      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow-x: hidden;
       position: relative;
     }
 
@@ -122,8 +129,9 @@
 
     /* --- UYGULAMA ÇERÇEVESİ (TAM EKRAN RESPONSIVE YAPILDI) --- */
     .app-container {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
       background-color: var(--bg-dark);
       position: relative;
       overflow: hidden;
@@ -177,7 +185,7 @@
 
     .app-bar-inner {
       width: 100%;
-      max-width: 1200px;
+      max-width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -268,7 +276,7 @@
 
     .screen-content-inner {
       width: 100%;
-      max-width: 1200px;
+      max-width: 100%;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
