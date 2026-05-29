@@ -41,10 +41,19 @@
       --panel-shadow: rgba(0, 0, 0, 0.8);
       
       /* Kategori Renkleri */
-      --cat-akaryakit: #4f46e5;
       --cat-gida: #10b981;
-      --cat-kafe: #f59e0b;
-      --cat-diger: #ef4444;
+      --cat-konut: #6366f1;
+      --cat-faturalar: #0ea5e9;
+      --cat-akaryakit: #3b82f6;
+      --cat-saglik: #ec4899;
+      --cat-yemek: #f97316;
+      --cat-giyim: #a855f7;
+      --cat-eglence: #eab308;
+      --cat-kisisel: #14b8a6;
+      --cat-tatil: #06b6d4;
+      --cat-teknoloji: #f43f5e;
+      --cat-hobiler: #84cc16;
+      --cat-diger: #94a3b8;
     }
 
     body.light-theme {
@@ -764,10 +773,19 @@
     }
 
     /* Kategori İkon Arka Planları */
-    .receipt-icon.akaryakit { background: rgba(79, 70, 229, 0.12); color: var(--cat-akaryakit); }
     .receipt-icon.gida { background: rgba(16, 185, 129, 0.12); color: var(--cat-gida); }
-    .receipt-icon.kafe { background: rgba(245, 158, 11, 0.12); color: var(--cat-kafe); }
-    .receipt-icon.diger { background: rgba(239, 68, 68, 0.12); color: var(--cat-diger); }
+    .receipt-icon.konut { background: rgba(99, 102, 241, 0.12); color: var(--cat-konut); }
+    .receipt-icon.faturalar { background: rgba(14, 165, 233, 0.12); color: var(--cat-faturalar); }
+    .receipt-icon.akaryakit { background: rgba(59, 130, 246, 0.12); color: var(--cat-akaryakit); }
+    .receipt-icon.saglik { background: rgba(236, 72, 153, 0.12); color: var(--cat-saglik); }
+    .receipt-icon.yemek { background: rgba(249, 115, 22, 0.12); color: var(--cat-yemek); }
+    .receipt-icon.giyim { background: rgba(168, 85, 247, 0.12); color: var(--cat-giyim); }
+    .receipt-icon.eglence { background: rgba(234, 179, 8, 0.12); color: var(--cat-eglence); }
+    .receipt-icon.kisisel { background: rgba(20, 184, 166, 0.12); color: var(--cat-kisisel); }
+    .receipt-icon.tatil { background: rgba(6, 182, 212, 0.12); color: var(--cat-tatil); }
+    .receipt-icon.teknoloji { background: rgba(244, 63, 94, 0.12); color: var(--cat-teknoloji); }
+    .receipt-icon.hobiler { background: rgba(132, 204, 22, 0.12); color: var(--cat-hobiler); }
+    .receipt-icon.diger { background: rgba(148, 163, 184, 0.12); color: var(--cat-diger); }
 
     .receipt-info {
       display: flex;
@@ -1526,8 +1544,17 @@
                 <div class="category-tabs" id="category-tabs-container">
                   <button class="tab-btn active" data-filter="Tümü">Tümü</button>
                   <button class="tab-btn" data-filter="Gıda">Gıda</button>
-                  <button class="tab-btn" data-filter="Akaryakıt">Akaryakıt</button>
-                  <button class="tab-btn" data-filter="Kafe">Kafe</button>
+                  <button class="tab-btn" data-filter="Konut">Konut</button>
+                  <button class="tab-btn" data-filter="Faturalar">Faturalar</button>
+                  <button class="tab-btn" data-filter="Akaryakıt/Ulaşım">Akaryakıt/Ulaşım</button>
+                  <button class="tab-btn" data-filter="Sağlık">Sağlık</button>
+                  <button class="tab-btn" data-filter="Yemek Dışarı">Yemek Dışarı</button>
+                  <button class="tab-btn" data-filter="Giyim">Giyim</button>
+                  <button class="tab-btn" data-filter="Eğlence">Eğlence</button>
+                  <button class="tab-btn" data-filter="Kişisel Bakım">Kişisel Bakım</button>
+                  <button class="tab-btn" data-filter="Tatil">Tatil</button>
+                  <button class="tab-btn" data-filter="Teknoloji">Teknoloji</button>
+                  <button class="tab-btn" data-filter="Hobiler">Hobiler</button>
                   <button class="tab-btn" data-filter="Diğer">Diğer</button>
                 </div>
 
@@ -1694,10 +1721,19 @@
                   <div class="form-group">
                     <label class="form-label">Harcama Kategorisi</label>
                     <select id="input-category" class="form-input" style="background-color: var(--bg-dark);">
-                      <option value="Gıda">Gıda / Market</option>
-                      <option value="Akaryakıt">Akaryakıt / Ulaşım</option>
-                      <option value="Kafe">Kafe / Restoran</option>
-                      <option value="Diğer">Diğer Ödemeler</option>
+                      <option value="Gıda">Gıda</option>
+                      <option value="Konut">Konut</option>
+                      <option value="Faturalar">Faturalar</option>
+                      <option value="Akaryakıt/Ulaşım">Akaryakıt/Ulaşım</option>
+                      <option value="Sağlık">Sağlık</option>
+                      <option value="Yemek Dışarı">Yemek Dışarı</option>
+                      <option value="Giyim">Giyim</option>
+                      <option value="Eğlence">Eğlence</option>
+                      <option value="Kişisel Bakım">Kişisel Bakım</option>
+                      <option value="Tatil">Tatil</option>
+                      <option value="Teknoloji">Teknoloji</option>
+                      <option value="Hobiler">Hobiler</option>
+                      <option value="Diğer">Diğer</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -1806,9 +1842,9 @@
     let receiptsData = [];
     
     const defaultReceipts = [
-      { id: 1, company: 'MİGROS TİCARET A.Ş.', date: '29.05.2026', receiptNo: '0032', kdv: '%20', amount: 642.80, icon: 'receipt', category: 'Gıda' },
-      { id: 2, company: 'SHELL PETROL A.Ş.', date: '28.05.2026', receiptNo: '0412', kdv: '%20', amount: 2450.00, icon: 'local_gas_station', category: 'Akaryakıt' },
-      { id: 3, company: 'STARBUCKS KAHVE', date: '28.05.2026', receiptNo: '0004', kdv: '%10', amount: 185.00, icon: 'local_cafe', category: 'Kafe' }
+      { id: 1, company: 'MİGROS TİCARET A.Ş.', date: '29.05.2026', receiptNo: '0032', kdv: '%20', amount: 642.80, icon: 'shopping_basket', category: 'Gıda' },
+      { id: 2, company: 'SHELL PETROL A.Ş.', date: '28.05.2026', receiptNo: '0412', kdv: '%20', amount: 2450.00, icon: 'local_gas_station', category: 'Akaryakıt/Ulaşım' },
+      { id: 3, company: 'STARBUCKS KAHVE', date: '28.05.2026', receiptNo: '0004', kdv: '%10', amount: 185.00, icon: 'restaurant', category: 'Yemek Dışarı' }
     ];
 
     function loadReceipts() {
@@ -1842,9 +1878,18 @@
       }
 
       const categories = {
-        'Akaryakıt': { amount: 0, color: 'var(--cat-akaryakit)', icon: 'local_gas_station' },
-        'Gıda': { amount: 0, color: 'var(--cat-gida)', icon: 'receipt' },
-        'Kafe': { amount: 0, color: 'var(--cat-kafe)', icon: 'local_cafe' },
+        'Gıda': { amount: 0, color: 'var(--cat-gida)', icon: 'shopping_basket' },
+        'Konut': { amount: 0, color: 'var(--cat-konut)', icon: 'home' },
+        'Faturalar': { amount: 0, color: 'var(--cat-faturalar)', icon: 'description' },
+        'Akaryakıt/Ulaşım': { amount: 0, color: 'var(--cat-akaryakit)', icon: 'local_gas_station' },
+        'Sağlık': { amount: 0, color: 'var(--cat-saglik)', icon: 'medical_services' },
+        'Yemek Dışarı': { amount: 0, color: 'var(--cat-yemek)', icon: 'restaurant' },
+        'Giyim': { amount: 0, color: 'var(--cat-giyim)', icon: 'checkroom' },
+        'Eğlence': { amount: 0, color: 'var(--cat-eglence)', icon: 'sports_esports' },
+        'Kişisel Bakım': { amount: 0, color: 'var(--cat-kisisel)', icon: 'spa' },
+        'Tatil': { amount: 0, color: 'var(--cat-tatil)', icon: 'flight' },
+        'Teknoloji': { amount: 0, color: 'var(--cat-teknoloji)', icon: 'devices' },
+        'Hobiler': { amount: 0, color: 'var(--cat-hobiler)', icon: 'sports_soccer' },
         'Diğer': { amount: 0, color: 'var(--cat-diger)', icon: 'payments' }
       };
 
@@ -1959,9 +2004,24 @@
 
       paginatedData.forEach(receipt => {
         let catClass = 'diger';
-        if (receipt.category === 'Akaryakıt') catClass = 'akaryakit';
-        else if (receipt.category === 'Gıda') catClass = 'gida';
-        else if (receipt.category === 'Kafe') catClass = 'kafe';
+        let iconName = 'payments';
+
+        const cat = receipt.category;
+        if (cat === 'Gıda') { catClass = 'gida'; iconName = 'shopping_basket'; }
+        else if (cat === 'Konut') { catClass = 'konut'; iconName = 'home'; }
+        else if (cat === 'Faturalar') { catClass = 'faturalar'; iconName = 'description'; }
+        else if (cat === 'Akaryakıt/Ulaşım') { catClass = 'akaryakit'; iconName = 'local_gas_station'; }
+        else if (cat === 'Sağlık') { catClass = 'saglik'; iconName = 'medical_services'; }
+        else if (cat === 'Yemek Dışarı') { catClass = 'yemek'; iconName = 'restaurant'; }
+        else if (cat === 'Giyim') { catClass = 'giyim'; iconName = 'checkroom'; }
+        else if (cat === 'Eğlence') { catClass = 'eglence'; iconName = 'sports_esports'; }
+        else if (cat === 'Kişisel Bakım') { catClass = 'kisisel'; iconName = 'spa'; }
+        else if (cat === 'Tatil') { catClass = 'tatil'; iconName = 'flight'; }
+        else if (cat === 'Teknoloji') { catClass = 'teknoloji'; iconName = 'devices'; }
+        else if (cat === 'Hobiler') { catClass = 'hobiler'; iconName = 'sports_soccer'; }
+
+        // Icon değerlerini çalışma zamanında eşleştir
+        receipt.icon = iconName;
 
         const itemHtml = `
           <div class="receipt-item" onclick="openReceiptDetails(${receipt.id})">
@@ -2404,18 +2464,45 @@
       // Firma Adı veya İçeriğe Göre Akıllı Kategori Tespiti (Öncelikli Eşleşme)
       const lowerCompany = company.toLowerCase() + ' ' + text.toLowerCase();
       
-      if (lowerCompany.includes('eczane') || lowerCompany.includes('ilac') || lowerCompany.includes('ilaç') || lowerCompany.includes('saglik') || lowerCompany.includes('sağlık') || lowerCompany.includes('optik') || lowerCompany.includes('medikal') || lowerCompany.includes('hastane') || lowerCompany.includes('klinik') || lowerCompany.includes('doktor') || lowerCompany.includes('pharmacy') || lowerCompany.includes('medicine')) {
-        category = 'Diğer';
-        kdv = '%10'; // İlaç ve sağlık hizmetlerinde genellikle KDV %10'dur
-      } else if (lowerCompany.includes('petrol') || lowerCompany.includes('opet') || lowerCompany.includes('shell') || lowerCompany.includes('bp') || lowerCompany.includes('aygaz') || lowerCompany.includes('lukoil') || lowerCompany.includes('akaryakit') || lowerCompany.includes('yakit') || lowerCompany.includes('istasyon') || lowerCompany.includes('otogaz') || lowerCompany.includes('yakıt') || lowerCompany.includes('akaryakıt')) {
-        category = 'Akaryakıt';
+      if (lowerCompany.includes('eczane') || lowerCompany.includes('ilac') || lowerCompany.includes('ilaç') || lowerCompany.includes('saglik') || lowerCompany.includes('sağlık') || lowerCompany.includes('optik') || lowerCompany.includes('medikal') || lowerCompany.includes('hastane') || lowerCompany.includes('klinik') || lowerCompany.includes('doktor') || lowerCompany.includes('pharmacy') || lowerCompany.includes('medicine') || lowerCompany.includes('tıp') || lowerCompany.includes('tip')) {
+        category = 'Sağlık';
+        kdv = '%10';
+      } else if (lowerCompany.includes('kira') || lowerCompany.includes('konut') || lowerCompany.includes('emlak') || lowerCompany.includes('aidat') || lowerCompany.includes('apartman') || lowerCompany.includes('site yonetimi') || lowerCompany.includes('rezidans') || lowerCompany.includes('daire')) {
+        category = 'Konut';
         kdv = '%20';
-      } else if (lowerCompany.includes('cafe') || lowerCompany.includes('kahve') || lowerCompany.includes('starbucks') || lowerCompany.includes('restaurant') || lowerCompany.includes('restoran') || lowerCompany.includes('yemek') || lowerCompany.includes('döner') || lowerCompany.includes('doner') || lowerCompany.includes('pizz') || lowerCompany.includes('burger') || lowerCompany.includes('kfc') || lowerCompany.includes('mcdonald') || lowerCompany.includes('pastane') || lowerCompany.includes('börek') || lowerCompany.includes('borek')) {
-        category = 'Kafe';
+      } else if (lowerCompany.includes('telekom') || lowerCompany.includes('vodafone') || lowerCompany.includes('turkcell') || lowerCompany.includes('ttnet') || lowerCompany.includes('superonline') || lowerCompany.includes('elektrik') || lowerCompany.includes('su faturasi') || lowerCompany.includes('dogalgaz') || lowerCompany.includes('doğalgaz') || lowerCompany.includes('aski') || lowerCompany.includes('iski') || lowerCompany.includes('fatura') || lowerCompany.includes('faturası') || lowerCompany.includes('faturasi')) {
+        category = 'Faturalar';
+        kdv = '%20';
+      } else if (lowerCompany.includes('petrol') || lowerCompany.includes('opet') || lowerCompany.includes('shell') || lowerCompany.includes('bp') || lowerCompany.includes('aygaz') || lowerCompany.includes('lukoil') || lowerCompany.includes('akaryakit') || lowerCompany.includes('yakit') || lowerCompany.includes('istasyon') || lowerCompany.includes('otogaz') || lowerCompany.includes('yakıt') || lowerCompany.includes('akaryakıt') || lowerCompany.includes('taksi') || lowerCompany.includes('uber') || lowerCompany.includes('bitaksi') || lowerCompany.includes('otopark') || lowerCompany.includes('hgs') || lowerCompany.includes('metro') || lowerCompany.includes('bilet') || lowerCompany.includes('havalimani') || lowerCompany.includes('havalimanı')) {
+        category = 'Akaryakıt/Ulaşım';
+        kdv = '%20';
+      } else if (lowerCompany.includes('cafe') || lowerCompany.includes('kahve') || lowerCompany.includes('starbucks') || lowerCompany.includes('restaurant') || lowerCompany.includes('restoran') || lowerCompany.includes('yemek') || lowerCompany.includes('döner') || lowerCompany.includes('doner') || lowerCompany.includes('pizz') || lowerCompany.includes('burger') || lowerCompany.includes('kfc') || lowerCompany.includes('mcdonald') || lowerCompany.includes('pastane') || lowerCompany.includes('börek') || lowerCompany.includes('borek') || lowerCompany.includes('donas') || lowerCompany.includes('köfte') || lowerCompany.includes('kofte') || lowerCompany.includes('rest') || lowerCompany.includes('lokanta')) {
+        category = 'Yemek Dışarı';
         kdv = '%10';
       } else if (lowerCompany.includes('migros') || lowerCompany.includes('bim') || lowerCompany.includes('sok') || lowerCompany.includes('şok') || lowerCompany.includes('a101') || lowerCompany.includes('carrefour') || lowerCompany.includes('market') || lowerCompany.includes('hipermarket') || lowerCompany.includes('gida') || lowerCompany.includes('gıda') || lowerCompany.includes('magaza') || lowerCompany.includes('mağaza') || lowerCompany.includes('manav') || lowerCompany.includes('kasap') || lowerCompany.includes('şarküteri') || lowerCompany.includes('sarkuteri') || lowerCompany.includes('tekel')) {
         category = 'Gıda';
         kdv = '%10';
+      } else if (lowerCompany.includes('lc waikiki') || lowerCompany.includes('lcw') || lowerCompany.includes('zara') || lowerCompany.includes('h&m') || lowerCompany.includes('koton') || lowerCompany.includes('defacto') || lowerCompany.includes('boyner') || lowerCompany.includes('mavi') || lowerCompany.includes('giyim') || lowerCompany.includes('ayakkabi') || lowerCompany.includes('ayakkabı') || lowerCompany.includes('elbise') || lowerCompany.includes('butik') || lowerCompany.includes('sarar') || lowerCompany.includes('tekstil')) {
+        category = 'Giyim';
+        kdv = '%10';
+      } else if (lowerCompany.includes('sinema') || lowerCompany.includes('tiyatro') || lowerCompany.includes('konser') || lowerCompany.includes('biletix') || lowerCompany.includes('netflix') || lowerCompany.includes('spotify') || lowerCompany.includes('oyun') || lowerCompany.includes('steam') || lowerCompany.includes('pub') || lowerCompany.includes('bar') || lowerCompany.includes('club') || lowerCompany.includes('eğlence') || lowerCompany.includes('eglence')) {
+        category = 'Eğlence';
+        kdv = '%20';
+      } else if (lowerCompany.includes('gratis') || lowerCompany.includes('watsons') || lowerCompany.includes('rossmann') || lowerCompany.includes('kuafor') || lowerCompany.includes('kuaför') || lowerCompany.includes('berber') || lowerCompany.includes('parfum') || lowerCompany.includes('parfüm') || lowerCompany.includes('kozmetik') || lowerCompany.includes('kisisel') || lowerCompany.includes('kişisel')) {
+        category = 'Kişisel Bakım';
+        kdv = '%20';
+      } else if (lowerCompany.includes('otel') || lowerCompany.includes('hotel') || lowerCompany.includes('pansiyon') || lowerCompany.includes('tatil') || lowerCompany.includes('turizm') || lowerCompany.includes('ets tur') || lowerCompany.includes('booking') || lowerCompany.includes('airbnb') || lowerCompany.includes('ucak') || lowerCompany.includes('uçak') || lowerCompany.includes('seyahat')) {
+        category = 'Tatil';
+        kdv = '%20';
+      } else if (lowerCompany.includes('teknosa') || lowerCompany.includes('vatan') || lowerCompany.includes('mediamarkt') || lowerCompany.includes('hepsiburada') || lowerCompany.includes('trendyol') || lowerCompany.includes('amazon') || lowerCompany.includes('bilgisayar') || lowerCompany.includes('telefon') || lowerCompany.includes('elektronik') || lowerCompany.includes('teknoloji')) {
+        category = 'Teknoloji';
+        kdv = '%20';
+      } else if (lowerCompany.includes('kitap') || lowerCompany.includes('d&r') || lowerCompany.includes('kirtasiye') || lowerCompany.includes('kırtasiye') || lowerCompany.includes('oyuncak') || lowerCompany.includes('spor') || lowerCompany.includes('gym') || lowerCompany.includes('fitness') || lowerCompany.includes('kurs') || lowerCompany.includes('hobi')) {
+        category = 'Hobiler';
+        kdv = '%20';
+      } else {
+        category = 'Diğer';
+        kdv = '%20';
       }
 
       // 4. Toplam Tutar Tespiti
