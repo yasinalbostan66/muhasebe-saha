@@ -2281,11 +2281,21 @@
             function loadReceipts() {
               const stored = localStorage.getItem('receiptsData');
               if (stored) {
-                receiptsData = JSON.parse(stored);
+                try {
+                  receiptsData = JSON.parse(stored);
+                  if (!Array.isArray(receiptsData)) {
+                    receiptsData = [...defaultReceipts];
+                  }
+                } catch (e) {
+                  console.error("Local büyük veri okunamadı, varsayılana dönülüyor:", e);
+                  receiptsData = [...defaultReceipts];
+                }
               } else {
                 receiptsData = [...defaultReceipts];
-                saveReceipts();
               }
+              // Bozuk, eksik veya null değerleri temizle
+              receiptsData = receiptsData.filter(item => item && typeof item === 'object' && item.id && typeof item.amount === 'number');
+              saveReceipts();
             }
 
             function saveReceipts() {
@@ -3607,12 +3617,17 @@
 
             // --- UYGULAMA AÇILIŞ TETİKLEMESİ ---
             window.addEventListener('load', () => {
-              loadReceipts();
-              updateDashboardStats();
-              renderReceiptsList();
-              renderCategoryChart();
-              renderKdvBreakdown();
-              document.getElementById('btn-kdv-export-excel').addEventListener('click', exportToExcel);
+              // Hataların menü geçişlerini engellememesi için güvenli yükleme zinciri
+              try { loadReceipts(); } catch (e) { console.error(e); }
+              try { updateDashboardStats(); } catch (e) { console.error(e); }
+              try { renderReceiptsList(); } catch (e) { console.error(e); }
+              try { renderCategoryChart(); } catch (e) { console.error(e); }
+              try { renderKdvBreakdown(); } catch (e) { console.error(e); }
+              
+              const kdvExcelBtn = document.getElementById('btn-kdv-export-excel');
+              if (kdvExcelBtn) {
+                kdvExcelBtn.addEventListener('click', exportToExcel);
+              }
               
               // Bottom Nav butonlarını bağla
               const navItems = document.querySelectorAll('.bottom-nav .nav-item[data-tab]');
