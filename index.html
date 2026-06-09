@@ -1679,11 +1679,15 @@
 
             <!-- Sağ Panel: Dosya Yükleme ve Aksiyon Butonları -->
             <div class="camera-right-panel">
-              <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
-              <label for="file-input" class="upload-label">
+              <!-- Native Kamera İçin Giriş -->
+              <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display: none;">
+              <!-- Galeri İçin Giriş -->
+              <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
+              
+              <label for="file-input-camera" class="upload-label">
                 <i class="material-icons" style="color: var(--secondary); font-size: 32px;">cloud_upload</i>
-                <div><strong>Fotoğraf Çek</strong> veya buraya sürükleyin</div>
-                <span style="font-size: 11px; color: var(--text-muted);">PNG, JPG</span>
+                <div><strong>Kamera ile Çek</strong> veya buraya sürükleyin</div>
+                <span style="font-size: 11px; color: var(--text-muted);">Telefon kamerası ile anında çekim</span>
               </label>
 
               <div class="camera-actions">
@@ -2479,9 +2483,10 @@
     }
 
     // --- DOSYA YÜKLEME VE SÜRÜKLEME ---
-    const fileInput = document.getElementById('file-input');
+    const fileInputCamera = document.getElementById('file-input-camera');
+    const fileInputGallery = document.getElementById('file-input-gallery');
     
-    fileInput.addEventListener('change', (e) => {
+    function handleFileSelect(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
@@ -2493,10 +2498,13 @@
         };
         reader.readAsDataURL(file);
       }
-    });
+    }
+    
+    fileInputCamera.addEventListener('change', handleFileSelect);
+    fileInputGallery.addEventListener('change', handleFileSelect);
 
     document.getElementById('btn-gallery').addEventListener('click', () => {
-      fileInput.click();
+      fileInputGallery.click();
     });
 
     const uploadLabel = document.querySelector('.upload-label');
