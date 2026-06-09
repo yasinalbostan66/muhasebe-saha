@@ -1571,6 +1571,23 @@
                   <!-- Dinamik olarak JS ile dolacaktır -->
                 </div>
               </div>
+
+              <!-- KDV Dağılımı ve Excel Dışa Aktarım Kartı -->
+              <div class="chart-card kdv-card" style="margin-top: 20px;">
+                <div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                  <i class="material-icons" style="color: var(--secondary);">account_balance_wallet</i>
+                  <span>KDV Oranlarına Göre Dağılım</span>
+                </div>
+                
+                <div id="kdv-list-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                  <!-- Dinamik olarak JS ile dolacaktır -->
+                </div>
+
+                <button id="btn-kdv-export-excel" class="btn btn-primary" style="width: 100%; font-size: 13px; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px;">
+                  <i class="material-icons">table_view</i>
+                  <span>Excel (CSV) Olarak İndir</span>
+                </button>
+              </div>
             </div>
 
             <!-- SAĞ KOLON (Akıllı Radar / Scanner & Fiş Listesi) -->
@@ -1870,7 +1887,8 @@
       const isLight = document.body.classList.contains('light-theme');
       localStorage.setItem('theme', isLight ? 'light' : 'dark');
       themeToggleBtn.querySelector('i').innerText = isLight ? 'dark_mode' : 'light_mode';
-      renderCategoryChart();
+       renderCategoryChart();
+      renderKdvBreakdown();
     });
 
     // --- EKRAN GEÇİŞ YÖNETİCİSİ (SPA ROUTER) ---
@@ -1917,6 +1935,63 @@
 
     function saveReceipts() {
       localStorage.setItem('receiptsData', JSON.stringify(receiptsData));
+    }
+
+    function calculateKdvAndMatrah(totalAmount, kdvRateStr) {
+      const rate = parseFloat(kdvRateStr.replace('%', ''));
+      if (isNaN(rate) || rate === 0) {
+        return { matrah: totalAmount, kdvAmount: 0 };
+      }
+      const matrah = totalAmount / (1 + rate / 100);
+      const kdvAmount = totalAmount - matrah;
+      return { matrah, kdvAmount };
+    }
+
+    function renderKdvBreakdown() {
+      const kdvRates = ['%20', '%10', '%1', '%0'];
+      const grouped = {};
+      kdvRates.forEach(rate => {
+        grouped[rate] = { count: 0, total: 0, matrah: 0, kdvAmount: 0 };
+      });
+      
+      receiptsData.forEach(r => {
+        let rateKey = r.kdv;
+        if (!kdvRates.includes(rateKey)) {
+          rateKey = '%20';
+        }
+        const calc = calculateKdvAndMatrah(r.amount, rateKey);
+        grouped[rateKey].count += 1;
+        grouped[rateKey].total += r.amount;
+        grouped[rateKey].matrah += calc.matrah;
+        grouped[rateKey].kdvAmount += calc.kdvAmount;
+      });
+      
+      const container = document.getElementById('kdv-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      kdvRates.forEach(rate => {
+        const data = grouped[rate];
+        if (data.count > 0) {
+          const itemHtml = `
+            <div style="display: flex; flex-direction: column; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 6px;">
+                <span style="color: var(--secondary);">KDV ${rate} (${data.count} Fiş)</span>
+                <span style="color: var(--text-main);">${data.total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>Matrah: ${data.matrah.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</span>
+                <span>KDV Tutar: ${data.kdvAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</span>
+              </div>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', itemHtml);
+        }
+      });
+      
+      if (container.innerHTML === '') {
+        container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:10px 0;">Kayıtlı fiş bulunmamaktadır.</div>';
+      }
     }
 
     // --- HARCAMA DAĞILIM GRAFİĞİ (SVG DONUT) ---
@@ -2294,6 +2369,7 @@
         updateDashboardStats();
         renderReceiptsList();
         renderCategoryChart();
+        renderKdvBreakdown();
         
         closeDrawer();
         showToast("Fiş başarıyla silindi.");
@@ -2930,6 +3006,7 @@
       updateDashboardStats();
       renderReceiptsList();
       renderCategoryChart();
+      renderKdvBreakdown();
       
       showScreen('dashboard');
       showToast(`${companyVal.toUpperCase()} fişi başarıyla kaydedildi!`);
@@ -3130,6 +3207,8 @@
       updateDashboardStats();
       renderReceiptsList();
       renderCategoryChart();
+      renderKdvBreakdown();
+      document.getElementById('btn-kdv-export-excel').addEventListener('click', exportToExcel);
       // Kategori Sekmelerinin Bağlanması
       const tabButtons = document.querySelectorAll('.category-tabs .tab-btn');
       tabButtons.forEach(btn => {
