@@ -1519,6 +1519,9 @@
             <span>Muhasebe Saha v1.1.2</span>
           </div>
           <div class="app-bar-actions">
+            <button id="btn-reset-data" class="theme-toggle-btn" style="color: var(--danger); margin-right: 8px;" title="Verileri Sıfırla">
+              <i class="material-icons">restart_alt</i>
+            </button>
             <button id="btn-theme-toggle" class="theme-toggle-btn">
               <i class="material-icons">light_mode</i>
             </button>
@@ -3250,6 +3253,18 @@
 
       document.getElementById('btn-export-excel').addEventListener('click', exportToExcel);
       document.getElementById('btn-export-pdf').addEventListener('click', exportToPDF);
+
+      document.getElementById('btn-reset-data').addEventListener('click', () => {
+        if (confirm("Tüm fiş verilerini silmek ve varsayılan örnek verileri geri yüklemek istediğinizden emin misiniz?")) {
+          localStorage.removeItem('receiptsData');
+          loadReceipts();
+          updateDashboardStats();
+          renderReceiptsList();
+          renderCategoryChart();
+          renderKdvBreakdown();
+          showToast("Veriler başarıyla sıfırlandı! ↺");
+        }
+      });
     });
   </script>
 
