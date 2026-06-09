@@ -1739,6 +1739,50 @@
     /* --- WEB (DESKTOP) RESPONSIVE MEDIA QUERIES   --- */
     /* --- ========================================== --- */
     @media (min-width: 768px) {
+      /* Masaüstünde telefonu simüle eden şık çerçeve */
+      .app-container {
+        max-width: 440px;
+        height: 900px;
+        max-height: 95vh;
+        border: 8px solid var(--phone-border);
+        border-radius: 40px;
+        box-shadow: 0 25px 60px -15px var(--panel-shadow), 0 0 40px rgba(79, 70, 229, 0.05);
+        margin: auto;
+      }
+
+      /* Masaüstünde Notch (Çentik) Göster */
+      .notch {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 25px;
+        background-color: var(--phone-border);
+        border-bottom-left-radius: 18px;
+        border-bottom-right-radius: 18px;
+        z-index: 999;
+      }
+
+      .notch-camera {
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #0d1117;
+      }
+
+      /* Masaüstünde alt navigasyon barını çerçevenin alt köşelerine uyarla */
+      .bottom-nav {
+        max-width: 424px; /* app-container genişliği eksi çerçeve payı */
+        border-bottom-left-radius: 32px;
+        border-bottom-right-radius: 32px;
+      }
+
       .responsive-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
