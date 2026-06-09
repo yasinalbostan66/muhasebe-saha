@@ -1739,9 +1739,31 @@
     /* --- WEB (DESKTOP) RESPONSIVE MEDIA QUERIES   --- */
     /* --- ========================================== --- */
     @media (min-width: 768px) {
+      .screen-content-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .app-bar-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .bottom-nav {
+        max-width: 1000px;
+        border-radius: 16px 16px 0 0;
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      body.light-theme .bottom-nav {
+        border-left: 1px solid rgba(0, 0, 0, 0.06);
+        border-right: 1px solid rgba(0, 0, 0, 0.06);
+      }
+
       .responsive-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.2fr 0.8fr;
         gap: 24px;
         width: 100%;
         align-items: start;
