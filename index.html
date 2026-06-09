@@ -2383,9 +2383,16 @@
               };
 
               receiptsData.forEach(item => {
-                const cat = item.category || 'Diğer';
+                let cat = item.category || 'Diğer';
+                // Eski veya alternatif kategori isimlerini yenileri ile eşleştir (Geriye dönük uyumluluk)
+                if (cat === 'Akaryakıt') cat = 'Akaryakıt/Ulaşım';
+                if (cat === 'Kafe') cat = 'Dışarıda yeme-içme';
+                if (cat === 'Kişisel Bakım') cat = 'Kozmetik';
+
                 if (categories[cat]) {
                   categories[cat].amount += item.amount;
+                } else {
+                  categories['Diğer'].amount += item.amount;
                 }
               });
 
@@ -2507,7 +2514,12 @@
                 let catClass = 'diger';
                 let iconName = 'payments';
 
-                const cat = receipt.category;
+                let cat = receipt.category;
+                // Eski kategori adlarını eşle
+                if (cat === 'Akaryakıt') cat = 'Akaryakıt/Ulaşım';
+                if (cat === 'Kafe') cat = 'Dışarıda yeme-içme';
+                if (cat === 'Kişisel Bakım') cat = 'Kozmetik';
+
                 if (cat === 'Gıda') { catClass = 'gida'; iconName = 'shopping_basket'; }
                 else if (cat === 'Konut') { catClass = 'konut'; iconName = 'home'; }
                 else if (cat === 'Faturalar') { catClass = 'faturalar'; iconName = 'description'; }
